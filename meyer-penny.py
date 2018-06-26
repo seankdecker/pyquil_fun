@@ -4,6 +4,10 @@ Meyer-Penny Game!
 Just to practice a bit
 '''
 
+######################################################################################
+# Message processing
+######################################################################################
+
 import sys
 
 mes = """=====================================================
@@ -26,16 +30,18 @@ if int(sys.argv[1]) != 0 and int(sys.argv[1]) != 1:
 choice = int(sys.argv[1])
 if choice == 1:
 	print('you chose to flip the penny')
-else:
+elif choice == 0:
 	print('you chose to not flip the penny!')
+else:
+	print('ERROR, choice seems to be corrupted')
+	exit(1)
 
-###########################################
+######################################################################################
 # Quantum Stuff
-
+######################################################################################
 
 from pyquil.quil import Program
 import pyquil.api as api
-
 from pyquil.gates import I, H, X, Y, CNOT
 
 qvm = api.QVMConnection()
