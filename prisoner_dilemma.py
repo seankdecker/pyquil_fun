@@ -5,6 +5,10 @@ https://en.wikipedia.org/wiki/Prisoner%27s_dilemma
 http://pyquil.readthedocs.io/en/latest/qvm.html#qvm
 '''
 
+import sys
+import math
+import numpy as np
+
 mes = """
 Here you are a prisoner and this is the dilemma:
 You, Y, and your buddy, B,  got caught robbing a bank.
@@ -29,7 +33,6 @@ Enter if you want to 'snitch' or if you stay 'silent'
 
 print(mes)
 
-
 if len(sys.argv) < 2:
 	print('enter a command line argument \n \'snitch\' if you want to snitch or \'silent\' 1 if you want to keep quiet')
 	exit(1)
@@ -43,15 +46,14 @@ if choice == 'snitch':
 elif choice == 'silent':
 	choice = 0
 	print('you chose to keep quiet!')
-
-quit(0)
+else:
+	print("ERROR, idk what you typed")
+	quit(1)
 
 from pyquil.quil import Program
 import pyquil.api as api
 
 from pyquil.gates import I, H, X, Y, CNOT
-
-
 
 
 qvm = api.QVMConnection()
@@ -65,6 +67,13 @@ if choice == 1:
 else:
 	# You choose to do nothing
 	your_action = I(0)
+
+miracle_move = np.array([[ 1.0j / math.sqrt(2), 1.0/ math.sqrt(2)],
+						 [-1.0 / math.sqrt(2), -1.0j/ math.sqrt(2)]])
+p = Program().defgate('MIRACLE', miracle_move)
+
+p.inst(('MIRACLE', 0))
+print(p)
 
 prog = (Program().
 	inst(
