@@ -57,38 +57,38 @@ def parseChoice():
 # define a unitary operator
 def controlled(u):
 	print('Your controlled f gate then corresponds to:')
-	cu = np.array([[(0 + f(0) + 1)%2, (1 + f(0) + 1)%2, 0, 0], 
-				   [(0 + f(0))%2, (1 + f(0))%2, 0, 0], 
+	cu = np.array([[(f(0) + 1)%2, f(0)%2, 0, 0], 
+				   [f(0)%2, (1 + f(0))%2, 0, 0], 
 				   [0, 0, (1 + f(1))%2, f(1)%2], 
-				   [0, 0, f(1)%2, (1 + f(1))%2]
-				  ])
+				   [0, 0, f(1)%2, (1 + f(1))%2]])
 	print(cu)
 	return cu
 
 def parseResult(result):
-	pass
+	if result[0][0] == 1:
+		print('looks like this is a balenced function!')
+	else:
+		print('it\'s a constant function!')
 
 
-def runGame(cf):
-	qvm = api.QVMConnection()
-	
+def runAlg(cf):
+	qvm = api.QVMConnection()	
 	p = Program()
-
 	p.defgate('cF', cf)
 
-	fourier = np.array([[1.0/math.sqrt(2), 1.0/math.sqrt(2)], [1.0/math.sqrt(2), -1.0/math.sqrt(2)]])
-	p.defgate('FOURIER', fourier)
-
-	p.inst(H(0), X(1), ('FOURIER', 1), ('cF', 0, 1), H(0), MEASURE(0, 0))
+	p.inst(
+		# Prepare 0 as a superposition |0> + |1>
+		# Prepare 1 as the Fourier Transform of |0> - |1>
+		H(0), X(1), H(1),
+		('cF', 0, 1), H(0), MEASURE(0, 0))
 	print(p)
-	result = qvm.run(p, [0], 20)
+	result = qvm.run(p, [0], 10)
 	print(result)
-
 	parseResult(result)
 
 if __name__ == "__main__":
 	introduction()
 	f = parseChoice()
 	cf = controlled(f)
-	# runGame(cf)
+	runAlg(cf)
 	quit()
