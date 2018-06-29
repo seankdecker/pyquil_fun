@@ -2,6 +2,9 @@
 Deutsh algorithm
 
 To practice, let's make the deutsh algorithm
+I'm all done, but I'm left with a question:
+how do we map from arbitrary real function f
+to a controlled unitary matrix cF in the circuit
 '''
 
 import sys
@@ -36,6 +39,7 @@ def parseChoice():
 			\n \'X\', \'I\', \'1\', or \'0\'')
 		exit(1)
 	# we set f to the function entered by the user
+	# These are all possible functions from 0,1 -> 0,1
 	if str(sys.argv[1]) == 'X':
 		f = lambda x: (x + 1)%2
 	elif str(sys.argv[1]) == 'I':
@@ -80,9 +84,12 @@ def runAlg(cf):
 		# Prepare 0 as a superposition |0> + |1>
 		# Prepare 1 as the Fourier Transform of |0> - |1>
 		H(0), X(1), H(1),
-		('cF', 0, 1), H(0), MEASURE(0, 0))
+		# one application of cF gate
+		('cF', 0, 1),
+		# project and measure
+		H(0), MEASURE(0, 0))
 	print(p)
-	result = qvm.run(p, [0], 10)
+	result = qvm.run(p, [0])
 	print(result)
 	parseResult(result)
 
