@@ -12,7 +12,7 @@ import numpy as np
 
 from pyquil.quil import Program
 import pyquil.api as api
-from pyquil.gates import I, H, X, Y, CNOT
+from pyquil.gates import *
 
 
 ######################################################################################
@@ -83,12 +83,39 @@ def parseChoice():
 # Quantum Stuff
 ######################################################################################
 
+def parseResult(result):
+	for game in result:
+		if game[0] == 1:
+			if game[1] == 1:
+				print('You both stayed quiet! You get -1 points')
+			else:
+				print('You stayed quiet, but your buddy snitched! You get -3 points')
+		else:
+			if game[1] == 1:
+				print('You snitched on a silent friend! You get 0 points')
+			else:
+				print('You both are rats. -2 points')
+
+
+
 def runGame(choice):
 	qvm = api.QVMConnection()
 	yourChoiceRegister = 0
 	buddyChoiceRegister = 1
+	
+	p = Program()
 
+	j = np.array([[1.0 / math.sqrt(2), 0, 0, 1.0j / math.sqrt(2)], 
+				  [0, 1.0 / math.sqrt(2), 1.0j / math.sqrt(2), 0],
+				  [0, 1.0j / math.sqrt(2), 1.0 / math.sqrt(2), 0],
+				  [1.0j / math.sqrt(2), 0, 0, 1.0 / math.sqrt(2)]])
+	p.defgate('J', j)
 
+	jt = np.array([[1.0 / math.sqrt(2), 0, 0, -1.0j / math.sqrt(2)], 
+				   [0, 1.0 / math.sqrt(2), -1.0j / math.sqrt(2), 0],
+				   [0, -1.0j / math.sqrt(2), 1.0 / math.sqrt(2), 0],
+				   [-1.0j / math.sqrt(2), 0, 0, 1.0 / math.sqrt(2)]])
+	p.defgate('Jt', jt)
 
 	if choice == 'snitch':
 		yourAction = X(yourChoiceRegister)
@@ -98,32 +125,15 @@ def runGame(choice):
 	print('your buddy will play the miracle move:')
 	miracleMove = np.array([[ 1.0j / math.sqrt(2), 1.0/ math.sqrt(2)],
 							 [-1.0 / math.sqrt(2), -1.0j/ math.sqrt(2)]])
-	p = Program().defgate('MIRACLE', miracleMove)
+	p.defgate('MIRACLE', miracleMove)
+	buddyAction = (('MIRACLE', buddyChoiceRegister))
 
-	p.inst()
+	p.inst(('J', 0, 1), yourAction, buddyAction, ('Jt', 0, 1), MEASURE(1, 1), MEASURE(0, 0))
 	print(p)
-
-	prog = (Program().
-		inst(
-		# the bit starts out in Heads, represented as |1>
-		I(0),
-		# Q puts penny in superposition of states by applying the Hadamard gate
-		('MIRACLE', 0),									############################################ Suspending work because I get a weird error when I apply this gate, which I believe is valid #########
-		# Your action
-		# yourAction,
-		# Q again applys the Hadamard gate
-		I(0)).
-		# measurement 
-		measure(0, yourChoiceRegister)
-		)
-	print(prog)
-	result = qvm.run(prog, [0])
+	result = qvm.run(p, [0, 1], 90)
 	print(result)
-	# if result[0][0] == 1:
-	# 	print('Looks like Q won and you\'re lost in space')
-	# else:
-	# 	print('Wow!...\n How\'d you win?')
 
+	parseResult(result)
 
 if __name__ == "__main__":
 	introduction()
