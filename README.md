@@ -9,6 +9,10 @@ meyer-penny:
 prisoner_dilemma:
 	Classic. But now quantum strats are valid
 
-And scripted up one algorithm
+And scripted up some algorithms:
+
 deutsch:
 	The first quantum algorithm that I understand
+
+quantum fourier transform:
+	just for 3 qubits to work out more how it works
